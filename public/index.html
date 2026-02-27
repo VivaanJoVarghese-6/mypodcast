@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyPodcast -Explore some information </title>
+    
+    <!-- Google Fonts  -->
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ===== CSS Reset & Variables ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Color Palette - Dark Theme */
+            --bg-primary: #0a0e27;
+            --bg-secondary: #1a1f3a;
+            --bg-tertiary: #2d3547;
+            --accent-primary: #00d4ff;
+            --accent-secondary: #ff006e;
+            --accent-gold: #ffd700;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b8cc;
+            --text-tertiary: #8892a4;
+            --glass-light: rgba(255, 255, 255, 0.08);
+            --glass-medium: rgba(255, 255, 255, 0.12);
+            --glass-dark: rgba(255, 255, 255, 0.05);
+            --success: #00d084;
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-medium: 0 15px 50px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 30px rgba(0, 212, 255, 0.2);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ===== Typography ===== */
+        h1, h2, h3, h4 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        h1 {
+            font-size: 5rem;
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        /* ===== Animations ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes glowPulse {
+            0%, 100% {
+                text-shadow: 0 0 10px rgba(0, 212, 255, 0.5), 0 0 20px rgba(0, 212, 255, 0.3);
+            }
+            50% {
+                text-shadow: 0 0 20px rgba(0, 212, 255, 0.8), 0 0 40px rgba(0, 212, 255, 0.5);
+            }
+        }
+
+        @keyframes countdownTick {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes floatIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        /* ===== Utility Classes ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .glass-effect {
+            background: var(--glass-light);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-medium);
+            border-radius: 20px;
+        }
+
+        /* ===== Header Section ===== */
+        header {
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated background gradient */
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 15s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .logo {
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo h1 {
+            animation: slideInDown 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: glowPulse 3s ease-in-out infinite;
+            font-size: 4.5rem;
+            letter-spacing: -3px;
+            margin: 0;
+        }
+
+        .logo p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            animation: fadeInUp 0.8s ease-out 0.3s both;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        /* ===== Sticky Navigation ===== */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--glass-dark);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-medium);
+            padding: 1.2rem 2rem;
+            transition: all 0.3s ease;
+        }
+
+        nav.scrolled {
+            background: var(--glass-light);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            list-style: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .nav-menu a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            position: relative;
+            transition: color 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-menu a::before {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: var(--accent-primary);
+        }
+
+        .nav-menu a:hover::before {
+            width: 100%;
+        }
+
+        /* ===== Next Podcast Section ===== */
+        #next-podcast {
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, rgba(45, 53, 71, 0.3) 0%, rgba(26, 31, 58, 0.3) 100%);
+            border-top: 1px solid var(--glass-medium);
+            border-bottom: 1px solid var(--glass-medium);
+        }
+
+        .podcast-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .podcast-left h2 {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2.5rem;
+            font-size: 2.5rem;
+        }
+
+        /* ===== Countdown Timer (Glassmorphism Style) ===== */
+        .countdown-container {
+            margin-bottom: 2.5rem;
+            animation: floatIn 0.8s ease-out 0.5s both;
+        }
+
+        .countdown {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 18px;
+            padding: 2rem 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .countdown-label {
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .countdown-grid {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+            perspective: none;
+        }
+
+        /* Timer Box */
+        .countdown-unit {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 12px 10px;
+            border-radius: 8px;
+            font-size: 28px;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+            color: #fff;
+            margin: 0;
+            position: static;
+            height: auto;
+        }
+
+        /* Hide flip-card elements */
+        .flip-card {
+            display: none;
+        }
+
+        .flip-card-front,
+        .flip-card-back {
+            display: none;
+        }
+
+        .countdown-label-unit {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            margin-top: 0;
+        }
+
+        /* Labels row */
+        .countdown-labels {
+            display: flex;
+            justify-content: center;
+            gap: 38px;
+            font-size: 11px;
+            opacity: 0.8;
+            margin-top: 0;
+        }
+
+        /* Remove colons */
+        .countdown-unit::after {
+            display: none;
+        }
+
+        .countdown-message {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            font-style: normal;
+            margin-top: 1rem;
+            opacity: 0.7;
+        }
+
+        /* ===== WhatsApp Button ===== */
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: linear-gradient(135deg, var(--success) 0%, #00a560 100%);
+            color: white;
+            padding: 1.1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 208, 132, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 2rem 0;
+        }
+
+        .whatsapp-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(0, 208, 132, 0.5);
+            background: linear-gradient(135deg, #00e085 0%, #00b56f 100%);
+        }
+
+        .whatsapp-btn i {
+            font-size: 1.3rem;
+        }
+
+        /* ===== Podcast Cover Image ===== */
+        .podcast-cover {
+            position: relative;
+            margin-bottom: 2rem;
+            animation: floatIn 0.8s ease-out 0.6s both;
+        }
+
+        .cover-image {
+            width: 100%;
+            max-width: 400px;
+            height: 400px;
+            border-radius: 20px;
+            object-fit: cover;
+            box-shadow: 0 25px 50px rgba(0, 212, 255, 0.2), var(--shadow-medium);
+            border: 1px solid var(--glass-medium);
+            transition: transform 0.3s ease;
+        }
+
+        .cover-image:hover {
+            transform: scale(1.03) rotateY(2deg);
+        }
+
+        /* ===== Episode Description ===== */
+        .episode-desc {
+            padding: 2rem;
+            border-radius: 15px;
+            background: linear-gradient(135deg, var(--glass-light) 0%, var(--glass-dark) 100%);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-medium);
+            animation: floatIn 0.8s ease-out 0.7s both;
+        }
+
+        .episode-desc h3 {
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .episode-desc p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        /* ===== About Section ===== */
+        #about {
+            position: relative;
+            padding: 6rem 2rem;
+            background-image: url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200&h=400&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            overflow: hidden;
+        }
+
+        /* Overlay for better text readability */
+        #about::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.85) 0%, rgba(26, 31, 58, 0.85) 100%);
+            backdrop-filter: blur(5px);
+            z-index: 1;
+        }
+
+        .about-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .about-content h2 {
+            text-align: center;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2rem;
+        }
+
+        .about-description {
+            max-width: 800px;
+            margin: 0 auto 4rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.9;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        /* ===== Team Grid ===== */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        /* ===== Profile Cards ===== */
+        .profile-card {
+            padding: 2rem;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--glass-light) 0%, var(--glass-dark) 100%);
+            backdrop-filter: blur(15px);
+            border: 1.5px solid var(--glass-medium);
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: floatIn 0.8s ease-out both;
+            cursor: pointer;
+        }
+
+        .profile-card:nth-child(1) { animation-delay: 0.5s; }
+        .profile-card:nth-child(2) { animation-delay: 0.6s; }
+        .profile-card:nth-child(3) { animation-delay: 0.7s; }
+        .profile-card:nth-child(4) { animation-delay: 0.8s; }
+
+        .profile-card:hover {
+            background: linear-gradient(135deg, var(--glass-medium) 0%, var(--glass-light) 100%);
+            border-color: var(--accent-primary);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 212, 255, 0.25), var(--shadow-medium);
+        }
+
+        .profile-photo {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 1.5rem;
+            border: 3px solid var(--accent-primary);
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .profile-card:hover .profile-photo {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .profile-name {
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .profile-role {
+            font-size: 0.85rem;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .profile-bio {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* ===== Footer ===== */
+        footer {
+            background: var(--glass-dark);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--glass-medium);
+            padding: 2.5rem;
+            text-align: center;
+            color: var(--text-tertiary);
+            font-size: 0.9rem;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        /* ===== Responsive Design ===== */
+        @media (max-width: 1024px) {
+            .podcast-grid {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            h1 {
+                font-size: 3.5rem;
+            }
+
+            h2 {
+                font-size: 2.2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.8rem;
+            }
+
+            h2 {
+                font-size: 1.8rem;
+            }
+
+            .logo h1 {
+                font-size: 2.8rem;
+            }
+
+            .nav-menu {
+                gap: 2rem;
+                font-size: 0.9rem;
+            }
+
+            .countdown-grid {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .countdown-unit {
+                min-width: 50px;
+                font-size: 1.5rem;
+            }
+
+            .countdown {
+                padding: 1.5rem;
+            }
+
+            .team-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            #next-podcast,
+            #about {
+                padding: 4rem 1.5rem;
+            }
+
+            header {
+                padding: 2.5rem 1.5rem;
+            }
+
+            .cover-image {
+                max-width: 100%;
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .logo h1 {
+                font-size: 2rem;
+            }
+
+            .nav-menu {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav {
+                padding: 1rem;
+            }
+
+            .countdown-grid {
+                gap: 6px;
+            }
+
+            .countdown-unit {
+                min-width: 45px;
+                font-size: 1.2rem;
+                padding: 10px 8px;
+            }
+
+            .countdown-label-unit {
+                font-size: 0.65rem;
+            }
+
+            .whatsapp-btn {
+                padding: 0.9rem 1.8rem;
+                font-size: 0.85rem;
+            }
+
+            .profile-photo {
+                width: 100px;
+                height: 100px;
+            }
+
+            header {
+                padding: 1.5rem 1rem;
+            }
+
+            #next-podcast,
+            #about {
+                padding: 2.5rem 1rem;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== Sticky Navigation ===== -->
+    <nav id="navbar">
+        <div class="container">
+            <ul class="nav-menu">
+                <li><a href="#next-podcast">Next Podcast</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="podcast2.html">Listen to Podcast</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ===== Header Section ===== -->
+    <header>
+        <div class="logo">
+            <h1>MYPODCAST</h1>
+            <p></p>
+        </div>
+    </header>
+
+    <!-- ===== Next Podcast Section ===== -->
+    <section id="next-podcast" class="container">
+        <div class="podcast-grid">
+            <!-- Left: Countdown & Info -->
+            <div class="podcast-left">
+                <h2>Next Podcast</h2>
+                
+                <!-- Countdown Timer -->
+                <div class="countdown-container">
+                    <div class="countdown">
+                        <div class="countdown-label">Countdown</div>
+                        <div class="countdown-grid">
+                            <div class="countdown-unit" id="days">00</div>
+                            <div class="countdown-unit" id="hours">00</div>
+                            <div class="countdown-unit" id="minutes">00</div>
+                            <div class="countdown-unit" id="seconds">00</div>
+                        </div>
+                        <div class="countdown-labels">
+                            <span>Days</span>
+                            <span>Hours</span>
+                            <span>Minutes</span>
+                            <span>Seconds</span>
+                        </div>
+                        <div class="countdown-message">
+                            🎙️ Episode drops February 11, 2026 at 11:00 PM
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WhatsApp Button -->
+                <a href="https://chat.whatsapp.com/LCzALJzq5aU8iPFWGyXvQd" target="_blank" class="whatsapp-btn">
+                    <i class="fab fa-whatsapp"></i>
+                    Join WhatsApp Group
+                </a>
+
+                <!-- Episode Description -->
+                <div class="episode-desc">
+                    <h3>🎧 Featured Episode: "Atheist vs Believers"</h3>
+                    <p>Join us for an open and thought-provoking conversation on atheism—exploring reason, science, critical thinking, and life beyond belief.
+Host Devan and guest Vivaan discuss ideas, questions, and perspectives that challenge traditional thinking and encourage rational dialogue</p>
+                </div>
+            </div>
+
+            <!-- Right: Podcast Cover -->
+            <div class="podcast-cover">
+                <img src="podcast.webp" alt="Podcast Cover Art" class="cover-image">
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== About Section ===== -->
+    <section id="about">
+        <div class="about-content container">
+            <h2>About Our Podcast</h2>
+            
+            <p class="about-description">
+
+            </p>
+
+            <!-- Team Members Grid -->
+            <div class="team-grid">
+                <!-- Team Member 1 -->
+                <div class="profile-card">
+                    <img src="https://cdn.discordapp.com/avatars/778569219260416010/b7b27af6cd41c7dbff75fa26d29a6588.webp?size=128"  class="profile-photo">
+                    <h3 class="profile-name">Vivaan JO Varghese</h3>
+                    <p class="profile-role">Host</p>
+                    <p class="profile-bio">Host,pursuing Btech in ECE</p>
+                </div>
+
+                <!-- Team Member 2 -->
+                <div class="profile-card">
+                    <img src="devan.webp" class="profile-photo">
+                    <h3 class="profile-name">Devan </h3>
+                    <p class="profile-role">Host & Guest</p>
+                    <p class="profile-bio">Host,JEE repeater,Athiest,intrested in science</p>
+                </div>
+
+                <!-- Team Member 3 -->
+                <div class="profile-card">
+                    <img src="https://cdn.discordapp.com/avatars/1413951667057066035/14aa018422278f7d58856804f21cb980.webp?size=128" class="profile-photo">
+                    <h3 class="profile-name">Felix Tom Boby</h3>
+                    <p class="profile-role">Guest</p>
+                    <p class="profile-bio">Pursuing Btech in AI,topper</p>
+                </div>
+
+                <!-- Team Member 4 -->
+                <div class="profile-card">
+                    <img src="alwin.webp"  class="profile-photo">
+                    <h3 class="profile-name">Alwin Jijo</h3>
+                    <p class="profile-role">Guest</p>
+                    <p class="profile-bio">Pursuring BCA,good man.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Footer ===== -->
+    <footer>
+        <p>&copy; 2026 MyPodcast. All rights reserved. | Stream on all major platforms.</p>
+    </footer>
+
+    <!-- ===== Minimal JavaScript ===== -->
+    <script>
+        // ===== Sticky Navigation Handler =====
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // ===== Countdown Timer =====
+        const targetDate = new Date("2026-02-27T23:00:00").getTime();
+        
+        setInterval(() => {
+            const now = new Date().getTime();
+            const diff = targetDate - now;
+            
+            if (diff < 0) return;
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / (1000 * 60)) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+            
+            document.getElementById("days").innerText = String(days).padStart(2, "0");
+            document.getElementById("hours").innerText = String(hours).padStart(2, "0");
+            document.getElementById("minutes").innerText = String(minutes).padStart(2, "0");
+            document.getElementById("seconds").innerText = String(seconds).padStart(2, "0");
+        }, 1000);
+
+        // ===== Smooth Scroll Enhancement =====
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
