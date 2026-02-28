@@ -186,7 +186,7 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
 
             try {
-                const res = await fetch('https://mypodcast-production.up.railway.app/login', {
+                const res = await fetch('https://mypodcast-production-7595.up.railway.app/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
@@ -219,7 +219,7 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
 
             try {
-                const res = await fetch('https://mypodcast-production.up.railway.app/send-otp', {
+                const res = await fetch('https://mypodcast-production-7595.up.railway.app/send-otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
@@ -280,7 +280,7 @@
         async function resendOTP() {
             showMessage('⏳ Resending OTP...', 'success');
             try {
-                const res = await fetch('http://localhost:3000/send-otp', {
+                const res = await fetch('https://mypodcast-production-7595.up.railway.app/send-otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: userEmail })
