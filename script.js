@@ -241,7 +241,18 @@ app.get('/dashboard', verifyToken, async (req, res) => {
   const user = await User.findById(req.user.id).select('-password');
   res.json({ message: `Welcome ${user.username} 🎉`, user });
 });
-
+app.get('/test', (req, res) => {
+  res.json({ 
+    message: 'Server is working!',
+    mongo: mongoose.connection.readyState === 1 ? 'Connected' : 'Not connected',
+    env: {
+      hasMongoUri: !!process.env.MONGO_URI,
+      hasJwtSecret: !!process.env.JWT_SECRET,
+      hasEmail: !!process.env.EMAIL,
+      hasEmailPass: !!process.env.EMAIL_PASSWORD
+    }
+  });
+});
 // ===================================================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
