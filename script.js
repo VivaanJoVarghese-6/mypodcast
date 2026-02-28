@@ -237,21 +237,22 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-app.get('/dashboard', verifyToken, async (req, res) => {
-  const user = await User.findById(req.user.id).select('-password');
-  res.json({ message: `Welcome ${user.username} 🎉`, user });
-});
-app.get('/test', (req, res) => {
-  res.json({ 
-    message: 'Server is working!',
-    mongo: mongoose.connection.readyState === 1 ? 'Connected' : 'Not connected',
-    env: {
-      hasMongoUri: !!process.env.MONGO_URI,
-      hasJwtSecret: !!process.env.JWT_SECRET,
-      hasEmail: !!process.env.EMAIL,
-      hasEmailPass: !!process.env.EMAIL_PASSWORD
-    }
-  });
+// Temporary test route
+app.get('/send-otp-test', async (req, res) => {
+  const email = req.query.email;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.json({ message: 'Email not registered' });
+    
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    await OTP.findOneAndDelete({ email });
+    await OTP.create({ email, otp, expiresAt: new Date(Date.now() + 10 * 60 * 1000) });
+    await sendOTPEmail(email, otp);
+    
+    res.json({ message: 'OTP sent!' });
+  } catch(err) {
+    res.json({ error: err.message });
+  }
 });
 // ===================================================
 const PORT = process.env.PORT || 3000;
