@@ -253,7 +253,7 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
 
             try {
-                const res = await fetch('https://mypodcast-production.up.railway.app/verify-otp', {
+                const res = await fetch('https://mypodcast-production-7595.up.railway.app/verify-otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: userEmail, otp })
