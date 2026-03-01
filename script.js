@@ -12,6 +12,13 @@ const { Resend } = require('resend');
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.post('/register', async (req, res) => {
+    try {
+        console.log(req.body);
+        res.json({ message: "User registered successfully" });
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
 app.use(express.static('public'));
 
 const resend = new Resend(process.env.RESEND_API_KEY);
