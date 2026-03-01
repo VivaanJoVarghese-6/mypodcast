@@ -1,3 +1,5 @@
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 const dns = require('dns');
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
@@ -54,26 +56,23 @@ const transporter = nodemailer.createTransport({
 // 🔹 Helper: Send OTP Email
 // ===================================================
 async function sendOTPEmail(email, otp, username = '') {
-  await transporter.sendMail({
-    from: `"MyPodcast 🎙️" <${process.env.EMAIL}>`,
+  await resend.emails.send({
+    from: 'onboarding@resend.dev',
     to: email,
     subject: '🔑 Your MyPodcast OTP Code',
     html: `
-      <div style="font-family: 'Outfit', Arial, sans-serif; background: #0a0e27; color: white; padding: 40px; border-radius: 20px; max-width: 500px; margin: auto;">
-        <h2 style="color: #00d4ff; font-size: 2rem; margin-bottom: 0.5rem;">MYPODCAST 🎙️</h2>
-        <p style="color: #b0b8cc; margin-bottom: 2rem;">Your one-time password</p>
-        <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 15px; padding: 2rem; text-align: center; margin-bottom: 2rem;">
-          <p style="color: #b0b8cc; font-size: 0.9rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 2px;">Your OTP Code</p>
-          <h1 style="color: #ff006e; font-size: 3.5rem; letter-spacing: 15px; margin: 0;">${otp}</h1>
-        </div>
-        <p style="color: #b0b8cc; font-size: 0.9rem;">⏰ This code expires in <strong style="color: white;">10 minutes</strong>.</p>
-        <p style="color: #b0b8cc; font-size: 0.9rem;">If you didn't request this, you can safely ignore this email.</p>
-        <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
-        <p style="color: rgba(255,255,255,0.3); font-size: 0.8rem;">© 2026 MyPodcast. All rights reserved.</p>
+      <div style="font-family: Arial; background: #0a0e27; color: white; padding: 40px; border-radius: 20px;">
+        <h2 style="color: #00d4ff;">MYPODCAST 🎙️</h2>
+        <h1 style="color: #ff006e; letter-spacing: 15px;">${otp}</h1>
+        <p style="color: #b0b8cc;">Expires in 10 minutes.</p>
       </div>
     `
   });
 }
+```
+
+---
+
 
 // ===================================================
 // ================= REGISTER =================
