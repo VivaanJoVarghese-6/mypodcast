@@ -10,8 +10,12 @@ const cors = require('cors');
 const { Resend } = require('resend');
 
 const app = express();
+
+// 🔹 Middleware
 app.use(express.json());
 app.use(cors());
+
+// 🔹 Register Route (PASTE HERE)
 app.post('/register', async (req, res) => {
     try {
         console.log(req.body);
@@ -19,6 +23,12 @@ app.post('/register', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: "Server error" });
     }
+});
+
+// 🔹 Start Server
+app.listen(3000, () => {
+    console.log("Server running on port 3000");
+});
 app.use(express.static('public'));
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -227,5 +237,4 @@ app.get('/test', (req, res) => {
 });
 
 // ===================================================
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
