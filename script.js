@@ -86,19 +86,32 @@ app.post('/register', async (req, res) => {
       return res.json({ message: 'All fields are required' });
     }
 
+    // Check if already registered but not verified
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.json({ message: 'Email already registered' });
+    if (existingUser && existingUser.isVerified) {
+      return res.json({ message: 'Email already registered' });
+    }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    await User.create({ username, email, password: hashedPassword });
+    // If user exists but not verified, just resend OTP
+    if (!existingUser) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await User.create({ username, email, password: hashedPassword });
+    }
 
-    // Generate OTP and send email
+    // Generate and save OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     await OTP.findOneAndDelete({ email });
     await OTP.create({ email, otp, expiresAt: new Date(Date.now() + 10 * 60 * 1000) });
-    await sendOTPEmail(email, otp, username);
 
-    res.json({ message: 'OTP sent! Check your email to verify your account.', requireOTP: true });
+    // Try to send email
+    try {
+      await sendOTPEmail(email, otp);
+      res.json({ message: 'OTP sent! Check your email to verify your account.', requireOTP: true });
+    } catch (emailError) {
+      console.error('Email error:', emailError.message);
+      res.json({ message: 'Email sending failed. Please try again or use a different email service.', requireOTP: false });
+    }
+
   } catch (error) {
     console.error(error);
     res.json({ message: 'Error registering user' });
