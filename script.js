@@ -1,3 +1,5 @@
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 const dns = require('dns');
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
@@ -58,15 +60,16 @@ const transporter = nodemailer.createTransport({
 // ===================================================
 async function sendOTPEmail(email, otp) {
   try {
-    await transporter.sendMail({
-       from: `"MyPodcast" <${process.env.EMAIL}>`,
+    await resend.emails.send({
+      from: 'onboarding@resend.dev', // works immediately
       to: email,
-      subject: "Your OTP",
-      text: `Your OTP is ${otp}`
+      subject: 'Your OTP Code',
+      html: `<h2>Your OTP is: ${otp}</h2>`
     });
-    console.log("OTP sent");
+
+    console.log("✅ OTP sent successfully");
   } catch (error) {
-    console.error("Email error:", error);
+    console.error("❌ Email sending failed:", error);
   }
 }
 
