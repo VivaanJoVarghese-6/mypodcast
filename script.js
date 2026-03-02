@@ -44,7 +44,9 @@ const OTP = mongoose.model('OTP', otpSchema);
 // ✅ Nodemailer (Gmail App Password)
 // ===================================================
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true, // true for 465
   auth: {
     user: process.env.EMAIL,
     pass: process.env.EMAIL_PASSWORD
@@ -55,17 +57,17 @@ const transporter = nodemailer.createTransport({
 // ✅ Send OTP Email
 // ===================================================
 async function sendOTPEmail(email, otp) {
-  await transporter.sendMail({
-    from: `"MyPodcast 🎙️" <${process.env.EMAIL}>`,
-    to: email,
-    subject: 'Your OTP Code',
-    html: `
-      <h2>MyPodcast 🎙️</h2>
-      <p>Your OTP Code:</p>
-      <h1>${otp}</h1>
-      <p>This code expires in 10 minutes.</p>
-    `
-  });
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL,
+      to: email,
+      subject: "Your OTP",
+      text: `Your OTP is ${otp}`
+    });
+    console.log("OTP sent");
+  } catch (error) {
+    console.error("Email error:", error);
+  }
 }
 
 // ===================================================
