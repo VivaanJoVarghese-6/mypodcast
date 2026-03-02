@@ -77,13 +77,6 @@ app.post('/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    if (!username || !email || !password)
-      return res.json({ message: 'All fields are required' });
-
-    const existingUser = await User.findOne({ email });
-    if (existingUser)
-      return res.json({ message: 'Email already registered' });
-
     const hashedPassword = await bcrypt.hash(password, 10);
     await User.create({ username, email, password: hashedPassword });
 
@@ -96,13 +89,16 @@ app.post('/register', async (req, res) => {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000)
     });
 
-    await sendOTPEmail(email, otp);
+    // 🔥 DO NOT block response if email fails
+    sendOTPEmail(email, otp)
+      .then(() => console.log("OTP sent"))
+      .catch(err => console.log("Email error:", err));
 
-    res.json({ message: 'OTP sent. Verify your email.', requireOTP: true });
+    res.json({ message: "OTP sent", requireOTP: true });
 
-  } catch (error) {
-    console.error(error);
-    res.json({ message: 'Error registering user' });
+  } catch (err) {
+    console.error(err);
+    res.json({ message: "Register error" });
   }
 });
 
