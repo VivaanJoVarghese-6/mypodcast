@@ -59,7 +59,7 @@ const transporter = nodemailer.createTransport({
 async function sendOTPEmail(email, otp) {
   try {
     await transporter.sendMail({
-      from: process.env.EMAIL,
+       from: `"MyPodcast" <${process.env.EMAIL}>`,
       to: email,
       subject: "Your OTP",
       text: `Your OTP is ${otp}`
