@@ -243,38 +243,47 @@
             btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
         }
 
-        // ===== VERIFY OTP =====
-        async function verifyOTP() {
-            const otp = document.getElementById('otp').value.trim();
-            if (!otp || otp.length !== 6) return showMessage('Please enter the 6-digit OTP.', 'error');
+                        
+ // Verify Login OTP
+// ============================
+ app.post("/verify-login-otp", async (req, res) => {
+   try {
+     const { email, otp } = req.body;
 
-            const btn = document.getElementById('verifyBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+    const record = await OTP.findOne({ email });
+    if (!record)
+      return res.json({ message: "OTP not found" });
 
-            try {
-                const res = await fetch('https://mypodcast-1.onrender.com/verify-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: userEmail, otp })
-                });
-                const data = await res.json();
+    if (record.expiresAt < new Date()) {
+      await OTP.deleteOne({ email });
+      return res.json({ message: "OTP expired" });
+    }
 
-                if (data.token) {
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('username', data.username);
-                    showMessage('✅ ' + data.message, 'success');
-                    setTimeout(() => window.location.href = 'index.html', 1000);
-                } else {
-                    showMessage('❌ ' + data.message, 'error');
-                }
-            } catch {
-                showMessage('❌ Cannot connect to server.', 'error');
-            }
+    if (record.otp !== otp.trim())
+      return res.json({ message: "Incorrect OTP" });
 
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify & Login';
-        }
+    await OTP.deleteOne({ email });
+
+    const user = await User.findOne({ email });
+
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.json({
+      message: "Login successful 🎉",
+      token,
+      username: user.username
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.json({ message: "Verification error" });
+  }
+});
+
 
         // ===== RESEND OTP =====
         async function resendOTP() {
