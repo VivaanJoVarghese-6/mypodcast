@@ -198,7 +198,7 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
 
             try {
-                 const res = await fetch('https://mypodcast-1.onrender.com/verify-register', {
+                 const res = await fetch('https://mypodcast-1.onrender.com/verify', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: userEmail, otp })
