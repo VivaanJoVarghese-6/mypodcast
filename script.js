@@ -210,6 +210,46 @@ app.post("/send-login-otp", async (req, res) => {
     res.json({ message: "Error sending login OTP" });
   }
 });
+// ============================
+// Verify Login OTP
+// ============================
+app.post("/verify-login-otp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const record = await OTP.findOne({ email });
+    if (!record)
+      return res.json({ message: "OTP not found" });
+
+    if (record.expiresAt < new Date()) {
+      await OTP.deleteOne({ email });
+      return res.json({ message: "OTP expired" });
+    }
+
+    if (record.otp !== otp.trim())
+      return res.json({ message: "Incorrect OTP" });
+
+    await OTP.deleteOne({ email });
+
+    const user = await User.findOne({ email });
+
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.json({
+      message: "Login successful 🎉",
+      token,
+      username: user.username
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.json({ message: "Verification error" });
+  }
+});
 
 // ============================
 // Protected Route
