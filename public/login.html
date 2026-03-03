@@ -219,7 +219,7 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
 
             try {
-                const res = await fetch('https://mypodcast-1.onrender.com/send-otp', {
+                const res = await fetch('https://mypodcast-1.onrender.com//send-login-otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
@@ -271,7 +271,7 @@
         async function resendOTP() {
             showMessage('⏳ Resending OTP...', 'success');
             try {
-                const res = await fetch('https://mypodcast-1.onrender.com/send-otp', {
+                const res = await fetch('https://mypodcast-1.onrender.com//send-login-otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: userEmail })
