@@ -5,24 +5,25 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
-const { Resend } = require("resend");
+const sgMail = require("@sendgrid/mail");
 
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use(express.static('public'));
-const resend = new Resend(process.env.RESEND_API_KEY);
+app.use(express.static("public"));
 
-// ===================================================
-// ✅ MongoDB Connection
-// ===================================================
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+// ============================
+// MongoDB Connection
+// ============================
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.log("❌ MongoDB Error:", err));
 
-// ===================================================
-// ✅ Schemas
-// ===================================================
+// ============================
+// Schemas
+// ============================
 const userSchema = new mongoose.Schema({
   username: String,
   email: { type: String, unique: true },
@@ -39,36 +40,37 @@ const otpSchema = new mongoose.Schema({
 const User = mongoose.model("User", userSchema);
 const OTP = mongoose.model("OTP", otpSchema);
 
-// ===================================================
-// ✅ Send OTP Email (Resend)
-// ===================================================
+// ============================
+// Send OTP Email (SendGrid)
+// ============================
 async function sendOTPEmail(email, otp) {
-  try {
-    const response = await resend.emails.send({
-      from: "onboarding@resend.dev",
-      to: email,
-      subject: "Your OTP Code",
-      html: `<h2>Your OTP is: ${otp}</h2>`
-    });
+  const msg = {
+    to: email,
+    from: process.env.EMAIL, // must be verified sender
+    subject: "Your OTP Code",
+    html: `<h2>Your OTP is: ${otp}</h2>`
+  };
 
-    console.log("RESEND SUCCESS:", response);
+  try {
+    await sgMail.send(msg);
+    console.log("✅ OTP Sent");
     return true;
   } catch (error) {
-    console.error("RESEND ERROR:", error);
+    console.error("❌ SendGrid Error:", error.response?.body || error);
     return false;
   }
 }
 
-// ===================================================
-// ✅ Root Test Route
-// ===================================================
+// ============================
+// Root Route
+// ============================
 app.get("/", (req, res) => {
-  res.send("MyPodcast Backend Running 🚀");
+  res.send("Backend Running 🚀");
 });
 
-// ===================================================
-// ✅ Register
-// ===================================================
+// ============================
+// Register
+// ============================
 app.post("/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -90,30 +92,30 @@ app.post("/register", async (req, res) => {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    await OTP.findOneAndDelete({ email });
+    await OTP.deleteOne({ email });
     await OTP.create({
       email,
       otp,
       expiresAt: new Date(Date.now() + 10 * 60 * 1000)
     });
 
-    const emailSent = await sendOTPEmail(email, otp);
+    const sent = await sendOTPEmail(email, otp);
 
-    if (!emailSent)
-      return res.json({ message: "Failed to send OTP email" });
+    if (!sent)
+      return res.json({ message: "Failed to send OTP" });
 
     res.json({ message: "OTP sent", requireOTP: true });
 
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     res.json({ message: "Register error" });
   }
 });
 
-// ===================================================
-// ✅ Verify OTP
-// ===================================================
-app.post("/verify-register", async (req, res) => {
+// ============================
+// Verify OTP
+// ============================
+app.post("/verify", async (req, res) => {
   try {
     const { email, otp } = req.body;
 
@@ -126,7 +128,7 @@ app.post("/verify-register", async (req, res) => {
       return res.json({ message: "OTP expired" });
     }
 
-    if (record.otp !== otp.toString().trim())
+    if (record.otp !== otp.trim())
       return res.json({ message: "Incorrect OTP" });
 
     await OTP.deleteOne({ email });
@@ -134,15 +136,14 @@ app.post("/verify-register", async (req, res) => {
 
     res.json({ message: "Email verified successfully ✅" });
 
-  } catch (error) {
-    console.error(error);
+  } catch {
     res.json({ message: "Verification error" });
   }
 });
 
-// ===================================================
-// ✅ Login
-// ===================================================
+// ============================
+// Login
+// ============================
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -154,8 +155,8 @@ app.post("/login", async (req, res) => {
     if (!user.isVerified)
       return res.json({ message: "Please verify email first" });
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
+    const match = await bcrypt.compare(password, user.password);
+    if (!match)
       return res.json({ message: "Invalid password" });
 
     const token = jwt.sign(
@@ -170,16 +171,15 @@ app.post("/login", async (req, res) => {
       username: user.username
     });
 
-  } catch (error) {
-    console.error(error);
+  } catch {
     res.json({ message: "Login error" });
   }
 });
 
-// ===================================================
-// ✅ Protected Route
-// ===================================================
-const verifyToken = (req, res, next) => {
+// ============================
+// Protected Route
+// ============================
+function verifyToken(req, res, next) {
   const token = req.headers.authorization;
   if (!token)
     return res.json({ message: "No token provided" });
@@ -190,18 +190,17 @@ const verifyToken = (req, res, next) => {
   } catch {
     res.json({ message: "Invalid token" });
   }
-};
+}
 
 app.get("/dashboard", verifyToken, async (req, res) => {
   const user = await User.findById(req.user.id).select("-password");
   res.json({ message: `Welcome ${user.username} 🎉`, user });
 });
 
-// ===================================================
-// ✅ Start Server
-// ===================================================
+// ============================
+// Start Server
+// ============================
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(PORT, () =>
+  console.log(`🚀 Server running on port ${PORT}`)
+);
