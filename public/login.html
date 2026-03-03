@@ -244,46 +244,28 @@
         }
 
                         
- // Verify Login OTP
-// ============================
- app.post("/verify-login-otp", async (req, res) => {
-   try {
-     const { email, otp } = req.body;
+       async function verifyLoginOTP() {
+       try {
+       const res = await fetch("/verify-login-otp", {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({ email: userEmail, otp })
+       });
 
-    const record = await OTP.findOne({ email });
-    if (!record)
-      return res.json({ message: "OTP not found" });
+       const data = await res.json();
 
-    if (record.expiresAt < new Date()) {
-      await OTP.deleteOne({ email });
-      return res.json({ message: "OTP expired" });
+      if (data.token) {
+         localStorage.setItem("token", data.token);
+         window.location.href = "dashboard.html";
+      } else {
+         showMessage("❌ " + data.message, "error");
+      }
+
+     } catch {
+       showMessage("❌ Cannot connect to server.", "error");
     }
-
-    if (record.otp !== otp.trim())
-      return res.json({ message: "Incorrect OTP" });
-
-    await OTP.deleteOne({ email });
-
-    const user = await User.findOne({ email });
-
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    res.json({
-      message: "Login successful 🎉",
-      token,
-      username: user.username
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.json({ message: "Verification error" });
   }
-});
-
+  
 
         // ===== RESEND OTP =====
         async function resendOTP() {
