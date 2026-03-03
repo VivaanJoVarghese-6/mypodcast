@@ -175,6 +175,41 @@ app.post("/login", async (req, res) => {
     res.json({ message: "Login error" });
   }
 });
+// ============================
+// Send Login OTP
+// ============================
+app.post("/send-login-otp", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.json({ message: "Email not registered" });
+
+    if (!user.isVerified)
+      return res.json({ message: "Please verify email first" });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await OTP.deleteOne({ email });
+
+    await OTP.create({
+      email,
+      otp,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+    });
+
+    const sent = await sendOTPEmail(email, otp);
+    if (!sent)
+      return res.json({ message: "Failed to send OTP" });
+
+    res.json({ message: "Login OTP sent", requireOTP: true });
+
+  } catch (err) {
+    console.error(err);
+    res.json({ message: "Error sending login OTP" });
+  }
+});
 
 // ============================
 // Protected Route
