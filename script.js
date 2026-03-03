@@ -115,7 +115,7 @@ app.post("/register", async (req, res) => {
 // ============================
 // Verify OTP
 // ============================
-app.post("/verify", async (req, res) => {
+app.post("/verify-register", async (req, res) => {
   try {
     const { email, otp } = req.body;
 
