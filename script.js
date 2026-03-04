@@ -46,14 +46,21 @@ const OTP = mongoose.model("OTP", otpSchema);
 async function sendOTPEmail(email, otp) {
   const msg = {
     to: email,
-    from: process.env.EMAIL, // must be verified sender
-    subject: "Your OTP Code",
-    html: `<h2>Your OTP is: ${otp}</h2>`
+    from: process.env.EMAIL,
+    subject: "🔑 Your MyPodcast OTP Code",
+    html: `
+      <div style="font-family: Arial; background: #0a0e27; color: white; padding: 40px; border-radius: 20px; max-width: 500px; margin: auto;">
+        <h2 style="color: #00d4ff;">MYPODCAST 🎙️</h2>
+        <p style="color: #b0b8cc;">Your one-time password:</p>
+        <h1 style="color: #ff006e; font-size: 3rem; letter-spacing: 15px;">${otp}</h1>
+        <p style="color: #b0b8cc;">Expires in 10 minutes.</p>
+        <p style="color: #b0b8cc;">If you did not request this, ignore this email.</p>
+      </div>
+    `
   };
-
   try {
     await sgMail.send(msg);
-    console.log("✅ OTP Sent");
+    console.log("✅ OTP Sent to", email);
     return true;
   } catch (error) {
     console.error("❌ SendGrid Error:", error.response?.body || error);
@@ -62,14 +69,7 @@ async function sendOTPEmail(email, otp) {
 }
 
 // ============================
-// Root Route
-// ============================
-app.get("/", (req, res) => {
-  res.send("Backend Running 🚀");
-});
-
-// ============================
-// Register
+// REGISTER
 // ============================
 app.post("/register", async (req, res) => {
   try {
@@ -79,32 +79,27 @@ app.post("/register", async (req, res) => {
       return res.json({ message: "All fields required" });
 
     const existingUser = await User.findOne({ email });
-    if (existingUser)
+
+    // If user exists and verified → block
+    if (existingUser && existingUser.isVerified)
       return res.json({ message: "Email already registered" });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // If user exists but NOT verified → delete and let them re-register
+    if (existingUser && !existingUser.isVerified)
+      await User.deleteOne({ email });
 
-    await User.create({
-      username,
-      email,
-      password: hashedPassword
-    });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await User.create({ username, email, password: hashedPassword });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
     await OTP.deleteOne({ email });
-    await OTP.create({
-      email,
-      otp,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000)
-    });
+    await OTP.create({ email, otp, expiresAt: new Date(Date.now() + 10 * 60 * 1000) });
 
     const sent = await sendOTPEmail(email, otp);
-
     if (!sent)
-      return res.json({ message: "Failed to send OTP" });
+      return res.json({ message: "Failed to send OTP. Please try again." });
 
-    res.json({ message: "OTP sent", requireOTP: true });
+    res.json({ message: "OTP sent! Check your email.", requireOTP: true });
 
   } catch (err) {
     console.error(err);
@@ -113,7 +108,7 @@ app.post("/register", async (req, res) => {
 });
 
 // ============================
-// Verify OTP
+// VERIFY REGISTER OTP
 // ============================
 app.post("/verify-register", async (req, res) => {
   try {
@@ -121,20 +116,20 @@ app.post("/verify-register", async (req, res) => {
 
     const record = await OTP.findOne({ email });
     if (!record)
-      return res.json({ message: "OTP not found" });
+      return res.json({ message: "OTP not found. Please register again." });
 
     if (record.expiresAt < new Date()) {
       await OTP.deleteOne({ email });
-      return res.json({ message: "OTP expired" });
+      return res.json({ message: "OTP expired. Please register again." });
     }
 
     if (record.otp !== otp.trim())
-      return res.json({ message: "Incorrect OTP" });
+      return res.json({ message: "Incorrect OTP. Try again." });
 
     await OTP.deleteOne({ email });
     await User.updateOne({ email }, { isVerified: true });
 
-    res.json({ message: "Email verified successfully ✅" });
+    res.json({ message: "Email verified successfully! You can now login. ✅" });
 
   } catch {
     res.json({ message: "Verification error" });
@@ -142,7 +137,7 @@ app.post("/verify-register", async (req, res) => {
 });
 
 // ============================
-// Login
+// LOGIN WITH PASSWORD
 // ============================
 app.post("/login", async (req, res) => {
   try {
@@ -152,33 +147,26 @@ app.post("/login", async (req, res) => {
     if (!user)
       return res.json({ message: "Email not registered" });
 
-    if (!user.isVerified)
-      return res.json({ message: "Please verify email first" });
+    if (user.isVerified === false)
+      return res.json({ message: "Please verify your email first" });
 
     const match = await bcrypt.compare(password, user.password);
     if (!match)
       return res.json({ message: "Invalid password" });
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    res.json({
-      message: "Login successful 🎉",
-      token,
-      username: user.username
-    });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    res.json({ message: "Login successful 🎉", token, username: user.username });
 
   } catch {
     res.json({ message: "Login error" });
   }
 });
+
 // ============================
-// Send Login OTP
+// SEND LOGIN OTP
+// (supports both /send-otp and /send-login-otp)
 // ============================
-app.post("/send-login-otp", async (req, res) => {
+async function handleSendOTP(req, res) {
   try {
     const { email } = req.body;
 
@@ -186,79 +174,72 @@ app.post("/send-login-otp", async (req, res) => {
     if (!user)
       return res.json({ message: "Email not registered" });
 
-    if (!user.isVerified)
-      return res.json({ message: "Please verify email first" });
+    if (user.isVerified === false)
+      return res.json({ message: "Please verify your email first" });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
     await OTP.deleteOne({ email });
-
-    await OTP.create({
-      email,
-      otp,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000)
-    });
+    await OTP.create({ email, otp, expiresAt: new Date(Date.now() + 10 * 60 * 1000) });
 
     const sent = await sendOTPEmail(email, otp);
     if (!sent)
-      return res.json({ message: "Failed to send OTP" });
+      return res.json({ message: "Failed to send OTP. Please try again." });
 
-    res.json({ message: "Login OTP sent", requireOTP: true });
+    res.json({ message: "OTP sent to your email!" });
 
   } catch (err) {
     console.error(err);
-    res.json({ message: "Error sending login OTP" });
+    res.json({ message: "Error sending OTP" });
   }
-});
+}
+
+// Both routes point to same function
+app.post("/send-otp", handleSendOTP);
+app.post("/send-login-otp", handleSendOTP);
+
 // ============================
-// Verify Login OTP
+// VERIFY LOGIN OTP
+// (supports both /verify-otp and /verify-login-otp)
 // ============================
-app.post("/verify-login-otp", async (req, res) => {
+async function handleVerifyOTP(req, res) {
   try {
     const { email, otp } = req.body;
 
     const record = await OTP.findOne({ email });
     if (!record)
-      return res.json({ message: "OTP not found" });
+      return res.json({ message: "OTP not found. Request a new one." });
 
     if (record.expiresAt < new Date()) {
       await OTP.deleteOne({ email });
-      return res.json({ message: "OTP expired" });
+      return res.json({ message: "OTP expired. Request a new one." });
     }
 
     if (record.otp !== otp.trim())
-      return res.json({ message: "Incorrect OTP" });
+      return res.json({ message: "Incorrect OTP. Try again." });
 
     await OTP.deleteOne({ email });
 
     const user = await User.findOne({ email });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    res.json({
-      message: "Login successful 🎉",
-      token,
-      username: user.username
-    });
+    res.json({ message: "Login successful 🎉", token, username: user.username });
 
   } catch (err) {
     console.error(err);
     res.json({ message: "Verification error" });
   }
-});
+}
+
+// Both routes point to same function
+app.post("/verify-otp", handleVerifyOTP);
+app.post("/verify-login-otp", handleVerifyOTP);
 
 // ============================
-// Protected Route
+// PROTECTED ROUTE
 // ============================
 function verifyToken(req, res, next) {
   const token = req.headers.authorization;
-  if (!token)
-    return res.json({ message: "No token provided" });
-
+  if (!token) return res.json({ message: "No token provided" });
   try {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
     next();
@@ -273,9 +254,23 @@ app.get("/dashboard", verifyToken, async (req, res) => {
 });
 
 // ============================
-// Start Server
+// TEST ROUTE
+// ============================
+app.get("/test", (req, res) => {
+  res.json({
+    message: "Server is working!",
+    mongo: mongoose.connection.readyState === 1 ? "Connected" : "Not connected",
+    env: {
+      hasMongoUri: !!process.env.MONGO_URI,
+      hasJwtSecret: !!process.env.JWT_SECRET,
+      hasSendGrid: !!process.env.SENDGRID_API_KEY,
+      hasEmail: !!process.env.EMAIL
+    }
+  });
+});
+
+// ============================
+// START SERVER
 // ============================
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () =>
-  console.log(`🚀 Server running on port ${PORT}`)
-);
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
