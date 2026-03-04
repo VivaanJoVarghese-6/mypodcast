@@ -209,90 +209,90 @@
             btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
         }
 
-        // ===== SEND OTP =====
-        async function sendOTP() {
-            const email = document.getElementById('otpEmail').value.trim();
-            if (!email) return showMessage('Please enter your email.', 'error');
-
-            const btn = document.getElementById('sendBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
-            try {
-                const res = await fetch('https://mypodcast-1.onrender.com//send-login-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-                const data = await res.json();
-
-                if (data.message === 'OTP sent to your email!') {
-                    userEmail = email;
-                    document.getElementById('emailDisplay').textContent = email;
-                    document.getElementById('otpStep1').style.display = 'none';
-                    document.getElementById('otpStep2').style.display = 'block';
-                    showMessage('✅ OTP sent! Check your inbox.', 'success');
-                } else {
-                    showMessage('❌ ' + data.message, 'error');
-                }
-            } catch {
-                showMessage('❌ Cannot connect to server.', 'error');
-            }
-
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
-        }
-
-                        
-       async function verifyLoginOTP() {
-       try {
-       const res = await fetch("/verify-login-otp", {
-       method: "POST",
-       headers: { "Content-Type": "application/json" },
-       body: JSON.stringify({ email: userEmail, otp })
-       });
-
-       const data = await res.json();
-
-      if (data.token) {
-         localStorage.setItem("token", data.token);
-         window.location.href = "dashboard.html";
-      } else {
-         showMessage("❌ " + data.message, "error");
-      }
-
-     } catch {
-       showMessage("❌ Cannot connect to server.", "error");
-    }
-  }
-  
-
-        // ===== RESEND OTP =====
-        async function resendOTP() {
-            showMessage('⏳ Resending OTP...', 'success');
-            try {
-                const res = await fetch('https://mypodcast-1.onrender.com//send-login-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: userEmail })
-                });
-                const data = await res.json();
-                showMessage(data.message.includes('sent') ? '✅ New OTP sent!' : '❌ ' + data.message,
-                            data.message.includes('sent') ? 'success' : 'error');
-            } catch {
-                showMessage('❌ Cannot connect to server.', 'error');
-            }
-        }
-
-        // Enter key support
-        document.addEventListener('keydown', (e) => {
-            if (e.key !== 'Enter') return;
-            const passVisible = document.getElementById('passwordSection').style.display !== 'none';
-            if (passVisible) { loginWithPassword(); return; }
-            const step2Visible = document.getElementById('otpStep2').style.display !== 'none';
-            step2Visible ? verifyOTP() : sendOTP();
+   // ===== SEND OTP =====
+async function sendOTP() {
+    const email = document.getElementById('otpEmail').value.trim();
+    if (!email) return showMessage('Please enter your email.', 'error');
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    try {
+        const res = await fetch('https://mypodcast-1.onrender.com/send-login-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
         });
-    </script>
+        const data = await res.json();
+        if (data.message === 'OTP sent to your email!' || data.message === 'Login OTP sent') {
+            userEmail = email;
+            document.getElementById('emailDisplay').textContent = email;
+            document.getElementById('otpStep1').style.display = 'none';
+            document.getElementById('otpStep2').style.display = 'block';
+            showMessage('✅ OTP sent! Check your inbox.', 'success');
+        } else {
+            showMessage('❌ ' + data.message, 'error');
+        }
+    } catch {
+        showMessage('❌ Cannot connect to server.', 'error');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
+}
 
+// ===== VERIFY OTP =====
+async function verifyOTP() {
+    const otp = document.getElementById('otp').value.trim();
+    if (!otp || otp.length !== 6) return showMessage('Please enter the 6-digit OTP.', 'error');
+    const btn = document.getElementById('verifyBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+    try {
+        const res = await fetch('https://mypodcast-1.onrender.com/verify-login-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: userEmail, otp })
+        });
+        const data = await res.json();
+        if (data.token) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('username', data.username);
+            showMessage('✅ ' + data.message, 'success');
+            setTimeout(() => window.location.href = 'index.html', 1000);
+        } else {
+            showMessage('❌ ' + data.message, 'error');
+        }
+    } catch {
+        showMessage('❌ Cannot connect to server.', 'error');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify & Login';
+}
+
+// ===== RESEND OTP =====
+async function resendOTP() {
+    showMessage('⏳ Resending OTP...', 'success');
+    try {
+        const res = await fetch('https://mypodcast-1.onrender.com/send-login-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: userEmail })
+        });
+        const data = await res.json();
+        showMessage(data.message.includes('sent') ? '✅ New OTP sent!' : '❌ ' + data.message,
+                    data.message.includes('sent') ? 'success' : 'error');
+    } catch {
+        showMessage('❌ Cannot connect to server.', 'error');
+    }
+}
+
+// Enter key support
+document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const passVisible = document.getElementById('passwordSection').style.display !== 'none';
+    if (passVisible) { loginWithPassword(); return; }
+    const step2Visible = document.getElementById('otpStep2').style.display !== 'none';
+    step2Visible ? verifyOTP() : sendOTP();
+});
+    </script>
 </body>
 </html>
