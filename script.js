@@ -5,14 +5,16 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
-const sgMail = require("@sendgrid/mail");
+
+// ✅ Brevo setup
+const SibApiV3Sdk = require("@getbrevo/brevo");
+const brevoClient = new SibApiV3Sdk.TransactionalEmailsApi();
+brevoClient.authentications["apiKey"].apiKey = process.env.BREVO_API_KEY;
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(express.static("public"));
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // ============================
 // MongoDB Connection
