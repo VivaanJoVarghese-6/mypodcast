@@ -268,6 +268,32 @@ app.get("/test", (req, res) => {
     }
   });
 });
+app.get('/test-smtp', (req, res) => {
+  const net = require('net');
+  const ports = [25, 465, 587, 2525];
+  const results = [];
+
+  ports.forEach(port => {
+    const socket = net.createConnection(port, 'smtp.gmail.com', () => {
+      results.push(`✅ Port ${port} — OPEN`);
+      socket.destroy();
+    });
+
+    socket.setTimeout(5000);
+    socket.on('timeout', () => {
+      results.push(`❌ Port ${port} — BLOCKED`);
+      socket.destroy();
+    });
+    socket.on('error', (err) => {
+      results.push(`❌ Port ${port} — ERROR: ${err.message}`);
+    });
+  });
+
+  // Wait for all tests then respond
+  setTimeout(() => {
+    res.json({ results });
+  }, 6000);
+});
 
 // ============================
 // START SERVER
