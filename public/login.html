@@ -177,6 +177,8 @@
         async function loginWithPassword() {
             const email    = document.getElementById('passEmail').value.trim();
             const password = document.getElementById('passPassword').value;
+             localStorage.setItem('username', username);   // saves the username
+             localStorage.setItem('email', email);  
             // NOTE: do NOT trim password — spaces matter!
 
             if (!email || !password) return showMessage('Please fill in all fields.', 'error');
