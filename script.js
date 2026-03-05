@@ -50,7 +50,7 @@ const OTP = mongoose.model("OTP", otpSchema);
 async function sendOTPEmail(email, otp) {
   try {
     await brevoClient.sendTransacEmail({
-      sender: { email: "mypodcast@gmail.com", name: "MyPodcast 🎙️" },
+      sender: { email: "mypodcast72@gmail.com", name: "MyPodcast 🎙️" },
       to: [{ email: email }],
       subject: "🔑 Your MyPodcast OTP Code",
       htmlContent: `
