@@ -44,26 +44,25 @@ const OTP = mongoose.model("OTP", otpSchema);
 // Send OTP Email (SendGrid)
 // ============================
 async function sendOTPEmail(email, otp) {
-  const msg = {
-    to: email,
-    from: process.env.EMAIL,
-    subject: "🔑 Your MyPodcast OTP Code",
-    html: `
-      <div style="font-family: Arial; background: #0a0e27; color: white; padding: 40px; border-radius: 20px; max-width: 500px; margin: auto;">
-        <h2 style="color: #00d4ff;">MYPODCAST 🎙️</h2>
-        <p style="color: #b0b8cc;">Your one-time password:</p>
-        <h1 style="color: #ff006e; font-size: 3rem; letter-spacing: 15px;">${otp}</h1>
-        <p style="color: #b0b8cc;">Expires in 10 minutes.</p>
-        <p style="color: #b0b8cc;">If you did not request this, ignore this email.</p>
-      </div>
-    `
-  };
   try {
-    await sgMail.send(msg);
+    await brevoClient.sendTransacEmail({
+      sender: { email: "mypodcast@gmail.com", name: "MyPodcast 🎙️" },
+      to: [{ email: email }],
+      subject: "🔑 Your MyPodcast OTP Code",
+      htmlContent: `
+        <div style="font-family: Arial; background: #0a0e27; color: white; padding: 40px; border-radius: 20px; max-width: 500px; margin: auto;">
+          <h2 style="color: #00d4ff;">MYPODCAST 🎙️</h2>
+          <p style="color: #b0b8cc;">Your one-time password:</p>
+          <h1 style="color: #ff006e; font-size: 3rem; letter-spacing: 15px;">${otp}</h1>
+          <p style="color: #b0b8cc;">Expires in 10 minutes.</p>
+          <p style="color: #b0b8cc;">If you did not request this, ignore this email.</p>
+        </div>
+      `
+    });
     console.log("✅ OTP Sent to", email);
     return true;
   } catch (error) {
-    console.error("❌ SendGrid Error:", error.response?.body || error);
+    console.error("❌ Brevo Error:", error);
     return false;
   }
 }
