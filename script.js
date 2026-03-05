@@ -5,9 +5,11 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
-
-// ✅ Brevo setup
 const SibApiV3Sdk = require("@getbrevo/brevo");
+
+// ============================
+// Brevo Setup
+// ============================
 const brevoClient = new SibApiV3Sdk.TransactionalEmailsApi();
 brevoClient.authentications["apiKey"].apiKey = process.env.BREVO_API_KEY;
 
@@ -43,7 +45,7 @@ const User = mongoose.model("User", userSchema);
 const OTP = mongoose.model("OTP", otpSchema);
 
 // ============================
-// Send OTP Email (SendGrid)
+// Send OTP Email (Brevo)
 // ============================
 async function sendOTPEmail(email, otp) {
   try {
@@ -81,11 +83,9 @@ app.post("/register", async (req, res) => {
 
     const existingUser = await User.findOne({ email });
 
-    // If user exists and verified → block
     if (existingUser && existingUser.isVerified)
       return res.json({ message: "Email already registered" });
 
-    // If user exists but NOT verified → delete and let them re-register
     if (existingUser && !existingUser.isVerified)
       await User.deleteOne({ email });
 
@@ -165,7 +165,6 @@ app.post("/login", async (req, res) => {
 
 // ============================
 // SEND LOGIN OTP
-// (supports both /send-otp and /send-login-otp)
 // ============================
 async function handleSendOTP(req, res) {
   try {
@@ -194,13 +193,11 @@ async function handleSendOTP(req, res) {
   }
 }
 
-// Both routes point to same function
 app.post("/send-otp", handleSendOTP);
 app.post("/send-login-otp", handleSendOTP);
 
 // ============================
 // VERIFY LOGIN OTP
-// (supports both /verify-otp and /verify-login-otp)
 // ============================
 async function handleVerifyOTP(req, res) {
   try {
@@ -231,7 +228,6 @@ async function handleVerifyOTP(req, res) {
   }
 }
 
-// Both routes point to same function
 app.post("/verify-otp", handleVerifyOTP);
 app.post("/verify-login-otp", handleVerifyOTP);
 
@@ -264,36 +260,9 @@ app.get("/test", (req, res) => {
     env: {
       hasMongoUri: !!process.env.MONGO_URI,
       hasJwtSecret: !!process.env.JWT_SECRET,
-      hasSendGrid: !!process.env.SENDGRID_API_KEY,
-      hasEmail: !!process.env.EMAIL
+      hasBrevo: !!process.env.BREVO_API_KEY
     }
   });
-});
-app.get('/test-smtp', (req, res) => {
-  const net = require('net');
-  const ports = [25, 465, 587, 2525];
-  const results = [];
-
-  ports.forEach(port => {
-    const socket = net.createConnection(port, 'smtp.gmail.com', () => {
-      results.push(`✅ Port ${port} — OPEN`);
-      socket.destroy();
-    });
-
-    socket.setTimeout(5000);
-    socket.on('timeout', () => {
-      results.push(`❌ Port ${port} — BLOCKED`);
-      socket.destroy();
-    });
-    socket.on('error', (err) => {
-      results.push(`❌ Port ${port} — ERROR: ${err.message}`);
-    });
-  });
-
-  // Wait for all tests then respond
-  setTimeout(() => {
-    res.json({ results });
-  }, 6000);
 });
 
 // ============================
