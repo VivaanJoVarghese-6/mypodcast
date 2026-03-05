@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0b0d11;
+      --surface:   #13161d;
+      --surface2:  #1a1e28;
+      --border:    rgba(255,255,255,0.07);
+      --accent:    #4f8ef7;
+      --accent2:   #a78bfa;
+      --danger:    #f75f5f;
+      --text-1:    #f0f2f8;
+      --text-2:    #8892a4;
+      --text-3:    #555f72;
+      --radius:    20px;
+      --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      overflow-x: hidden;
+    }
+
+    /* Background blobs */
+    .bg-blob {
+      position: fixed; border-radius: 50%;
+      filter: blur(90px); opacity: 0.18;
+      pointer-events: none; z-index: 0;
+      animation: float 12s ease-in-out infinite;
+    }
+    .blob-1 { width:500px; height:500px; background:var(--accent);  top:-150px; left:-100px; animation-delay:0s; }
+    .blob-2 { width:400px; height:400px; background:var(--accent2); bottom:-100px; right:-80px; animation-delay:-4s; }
+    .blob-3 { width:300px; height:300px; background:#38bdf8; top:50%; left:50%; transform:translate(-50%,-50%); animation-delay:-8s; opacity:0.08; }
+
+    @keyframes float {
+      0%,100% { transform: translateY(0) scale(1); }
+      50%     { transform: translateY(-30px) scale(1.05); }
+    }
+
+    /* Layout */
+    .page-wrapper { position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; }
+
+    /* Navbar */
+    .navbar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:20px 36px;
+      border-bottom:1px solid var(--border);
+      background:rgba(11,13,17,0.7);
+      backdrop-filter:blur(16px);
+      position:sticky; top:0; z-index:10;
+    }
+    .nav-logo {
+      font-family:'Syne',sans-serif; font-weight:800; font-size:1.3rem; letter-spacing:-0.5px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .logout-btn {
+      display:flex; align-items:center; gap:8px;
+      padding:8px 18px; border-radius:50px;
+      border:1px solid var(--border); background:var(--surface);
+      color:var(--text-2); font-family:'DM Sans',sans-serif;
+      font-size:0.88rem; font-weight:500; cursor:pointer;
+      transition:var(--transition);
+    }
+    .logout-btn:hover { border-color:var(--danger); color:var(--danger); background:rgba(247,95,95,0.08); }
+
+    /* Main */
+    .main-content { flex:1; display:flex; align-items:center; justify-content:center; padding:60px 24px; }
+
+    /* Profile card */
+    .profile-card {
+      width:100%; max-width:440px;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      overflow:hidden;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 24px 80px rgba(0,0,0,0.5), 0 0 60px rgba(79,142,247,0.06);
+      animation: cardIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes cardIn {
+      from { opacity:0; transform:translateY(30px) scale(0.95); }
+      to   { opacity:1; transform:translateY(0) scale(1); }
+    }
+
+    /* Card header */
+    .card-header {
+      position:relative; padding:40px 40px 0;
+      display:flex; justify-content:center;
+      background:linear-gradient(180deg,rgba(79,142,247,0.06) 0%,transparent 100%);
+    }
+    .avatar-ring {
+      width:96px; height:96px; border-radius:50%; padding:3px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      box-shadow:0 0 30px rgba(79,142,247,0.3);
+    }
+    .avatar {
+      width:100%; height:100%; border-radius:50%;
+      background:var(--surface2);
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Syne',sans-serif; font-weight:700; font-size:2rem; color:var(--text-1);
+    }
+    .status-dot {
+      position:absolute; bottom:4px; left:calc(50% + 28px);
+      width:14px; height:14px; border-radius:50%;
+      background:#22c55e; border:3px solid var(--surface);
+      box-shadow:0 0 10px rgba(34,197,94,0.5);
+    }
+
+    /* Card body */
+    .card-body { padding:28px 40px; text-align:center; }
+    .greeting { color:var(--text-3); font-size:0.82rem; font-weight:500; text-transform:uppercase; letter-spacing:2px; margin-bottom:6px; }
+    .username { font-family:'Syne',sans-serif; font-weight:800; font-size:2rem; letter-spacing:-1px; color:var(--text-1); margin-bottom:20px; animation:fadeUp 0.5s 0.3s both; }
+    .info-row {
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 20px; background:var(--surface2);
+      border:1px solid var(--border); border-radius:50px;
+      font-size:0.9rem; color:var(--text-2); margin-bottom:28px;
+      animation:fadeUp 0.5s 0.4s both;
+    }
+    .info-icon { font-size:1rem; color:var(--accent); }
+    .divider { width:100%; height:1px; background:var(--border); margin-bottom:24px; }
+    .action-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .action-btn {
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      padding:12px; border-radius:12px;
+      border:1px solid var(--border); background:var(--surface2);
+      color:var(--text-2); font-family:'DM Sans',sans-serif;
+      font-size:0.88rem; font-weight:500; cursor:pointer;
+      transition:var(--transition);
+    }
+    .action-btn:hover { border-color:rgba(79,142,247,0.3); background:rgba(79,142,247,0.08); color:var(--accent); transform:translateY(-2px); }
+
+    /* Card footer */
+    .card-footer { padding:20px 40px 36px; }
+    .logout-full-btn {
+      width:100%; padding:14px; border-radius:12px;
+      border:1px solid rgba(247,95,95,0.25); background:rgba(247,95,95,0.06);
+      color:var(--danger); font-family:'DM Sans',sans-serif;
+      font-size:0.95rem; font-weight:500; cursor:pointer;
+      transition:var(--transition); letter-spacing:0.3px;
+    }
+    .logout-full-btn:hover { background:rgba(247,95,95,0.15); border-color:var(--danger); transform:translateY(-1px); box-shadow:0 8px 24px rgba(247,95,95,0.15); }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+    /* Modal */
+    .modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.7);
+      backdrop-filter:blur(8px);
+      display:flex; align-items:center; justify-content:center;
+      z-index:100; opacity:0; pointer-events:none;
+      transition:opacity 0.25s ease;
+    }
+    .modal-overlay.active { opacity:1; pointer-events:all; }
+    .modal {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:var(--radius); padding:40px 36px;
+      max-width:360px; width:90%; text-align:center;
+      box-shadow:0 40px 100px rgba(0,0,0,0.6);
+      transform:translateY(20px) scale(0.95);
+      transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .modal-overlay.active .modal { transform:translateY(0) scale(1); }
+    .modal-icon { font-size:2.5rem; margin-bottom:16px; color:var(--danger); }
+    .modal h2 { font-family:'Syne',sans-serif; font-weight:700; font-size:1.4rem; margin-bottom:10px; }
+    .modal p { color:var(--text-2); font-size:0.92rem; line-height:1.6; margin-bottom:28px; }
+    .modal-actions { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .modal-cancel {
+      padding:12px; border-radius:10px;
+      border:1px solid var(--border); background:var(--surface2);
+      color:var(--text-2); font-family:'DM Sans',sans-serif;
+      font-size:0.9rem; cursor:pointer; transition:var(--transition);
+    }
+    .modal-cancel:hover { background:var(--surface); color:var(--text-1); }
+    .modal-confirm {
+      padding:12px; border-radius:10px;
+      border:1px solid rgba(247,95,95,0.3); background:rgba(247,95,95,0.1);
+      color:var(--danger); font-family:'DM Sans',sans-serif;
+      font-size:0.9rem; font-weight:600; cursor:pointer; transition:var(--transition);
+    }
+    .modal-confirm:hover { background:var(--danger); color:white; }
+
+    @media (max-width:480px) {
+      .navbar { padding:16px 20px; }
+      .card-body { padding:24px 28px; }
+      .card-footer { padding:16px 28px 28px; }
+      .username { font-size:1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+  <div class="bg-blob blob-3"></div>
+
+  <div class="page-wrapper">
+
+    <nav class="navbar">
+      <div class="nav-logo">MyApp</div>
+      <button class="logout-btn" onclick="handleLogout()">
+        <span>⏻</span> Log Out
+      </button>
+    </nav>
+
+    <main class="main-content">
+      <div class="profile-card">
+
+        <div class="card-header">
+          <div class="avatar-ring">
+            <div class="avatar" id="avatarInitials">?</div>
+          </div>
+          <div class="status-dot"></div>
+        </div>
+
+        <div class="card-body">
+          <p class="greeting">Welcome back,</p>
+          <h1 class="username" id="displayUsername">Loading...</h1>
+
+          <div class="info-row">
+            <span class="info-icon">✉</span>
+            <span id="displayEmail">Loading...</span>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="action-grid">
+            <button class="action-btn" onclick="alert('Edit profile coming soon!')">
+              <span>✏</span><span>Edit Profile</span>
+            </button>
+            <button class="action-btn" onclick="alert('Settings coming soon!')">
+              <span>⚙</span><span>Settings</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <button class="logout-full-btn" onclick="handleLogout()">
+            Sign Out of Account
+          </button>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Logout Modal -->
+  <div class="modal-overlay" id="logoutModal">
+    <div class="modal">
+      <div class="modal-icon">⏻</div>
+      <h2>Log out?</h2>
+      <p>Are you sure you want to sign out of your account?</p>
+      <div class="modal-actions">
+        <button class="modal-cancel"  onclick="closeModal()">Cancel</button>
+        <button class="modal-confirm" onclick="confirmLogout()">Yes, log out</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Load user info from localStorage ──
+    // In your login page, after successful login do:
+    //   localStorage.setItem('username', 'JohnDoe');
+    //   localStorage.setItem('email', 'john@gmail.com');
+    //   window.location.href = 'profile.html';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const username = localStorage.getItem('username') || 'Unknown User';
+      const email    = localStorage.getItem('email')    || 'No email found';
+
+      document.getElementById('displayUsername').textContent = username;
+      document.getElementById('displayEmail').textContent    = email;
+      document.getElementById('avatarInitials').textContent  = username.charAt(0).toUpperCase();
+    });
+
+    function handleLogout() {
+      document.getElementById('logoutModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('logoutModal').classList.remove('active');
+    }
+
+    function confirmLogout() {
+      localStorage.removeItem('username');
+      localStorage.removeItem('email');
+      // ⚠️ Change 'login.html' to your actual login page filename
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('logoutModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+
+</body>
+</html>
