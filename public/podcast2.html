@@ -1023,77 +1023,7 @@
   </div>
 </section>
 
-<!-- UPLOAD SECTION -->
-<section id="upload">
-  <div class="section-header">
-    <div>
-      <span class="section-kicker">Admin Panel</span>
-      <h2 class="section-title">UPLOAD<br>EPISODE</h2>
-    </div>
-  </div>
-  <div class="upload-grid">
-    <div class="upload-left">
-      <p class="upload-desc">Share your voice with the world. Upload your podcast episodes directly to the Wavelength platform — reach thousands of listeners instantly.</p>
-      <div class="upload-feature">High quality audio processing</div>
-      <div class="upload-feature">Instant publishing to gallery</div>
-      <div class="upload-feature">Automatic episode numbering</div>
-      <div class="upload-feature">Category & tag support</div>
-    </div>
-    <div class="upload-right">
-      <form class="upload-form" id="uploadForm">
-        <div class="form-row">
-          <div class="field">
-            <label>Podcast Title *</label>
-            <input type="text" id="f-title" placeholder="Enter episode title" required>
-          </div>
-          <div class="field">
-            <label>Episode Number *</label>
-            <input type="number" id="f-ep" placeholder="e.g. 42" min="1" required>
-          </div>
-        </div>
-        <div class="field">
-          <label>Description</label>
-          <textarea id="f-desc" placeholder="What is this episode about?"></textarea>
-        </div>
-        <div class="form-row">
-          <div class="field">
-            <label>Category</label>
-            <select id="f-cat">
-              <option value="tech">Tech</option>
-              <option value="culture">Culture</option>
-              <option value="design">Design</option>
-              <option value="science">Science</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Duration</label>
-            <input type="text" id="f-dur" placeholder="e.g. 42:30">
-          </div>
-        </div>
-        <div class="field">
-          <label>Thumbnail Image</label>
-          <div class="file-drop" id="thumbDrop">
-            <input type="file" id="f-thumb" accept="image/*" onchange="handleThumbFile(this)">
-            <div class="file-drop-icon">🖼️</div>
-            <div class="file-drop-text">Drop image or <span>browse</span></div>
-            <div id="thumbName" style="margin-top:8px;font-family:var(--font-mono);font-size:10px;color:var(--accent);"></div>
-          </div>
-        </div>
-        <div class="field">
-          <label>Video File</label>
-          <div class="file-drop" id="videoDrop">
-            <input type="file" id="f-video" accept="video/*" onchange="handleVideoFile(this)">
-            <div class="file-drop-icon">🎬</div>
-            <div class="file-drop-text">Drop video or <span>browse</span></div>
-            <div id="videoName" style="margin-top:8px;font-family:var(--font-mono);font-size:10px;color:var(--accent);"></div>
-          </div>
-        </div>
-        <div class="upload-success" id="uploadSuccess">✓ Episode published successfully!</div>
-        <button type="submit" class="upload-btn">PUBLISH EPISODE →</button>
-      </form>
-    </div>
-  </div>
-</section>
+
 
 <!-- FOOTER -->
 <footer>
